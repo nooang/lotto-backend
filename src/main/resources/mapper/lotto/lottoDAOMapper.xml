@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.board.dao.BoardDAO">
+	<insert id="insertLottoData" parameterType="com.lotto.vo.LottoVO">
+		INSERT INTO LOTTO_RECORD (
+			   LOTTO_ID
+			 , TOT_SELLAMNT
+			 , RETURN_VALUE
+			 , DRW_NO_DATE
+			 , FIRST_WINAMNT
+			 , DRWT_NO6
+			 , DRWT_NO4
+			 , FIRST_PRZWNER_CO
+			 , DRWT_NO5
+			 , BNUS_NO
+			 , FIRST_ACCUMAMNT
+			 , DRW_NO
+			 , DRWT_NO2
+			 , DRWT_NO3
+			 , DRWT_NO1)
+		VALUES (
+			   'LT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || LPAD(SEQ_LOTTO_PK.NEXTVAL, 6, 0)
+			 , #{totSellamnt}
+			 , #{returnValue}
+			 , #{drwNoDate}
+			 , #{firstWinamnt}
+			 , #{drwtNo6}
+			 , #{drwtNo4}
+			 , #{firstPrzwnerCo}
+			 , #{drwtNo5}
+			 , #{bnusNo}
+			 , #{firstAccumamnt}
+			 , #{drwNo}
+			 , #{drwtNo2}
+			 , #{drwtNo3}
+			 , #{drwtNo1})
+	</insert>
+	
+	<select id="getNumCount" parameterType="int"
+			resultType="int">
+		SELECT COUNT(1)
+		  FROM LOTTO_RECORD
+		 WHERE DRWT_NO1 = #{parameter}
+		    OR DRWT_NO2 = #{parameter}
+		    OR DRWT_NO3 = #{parameter}
+		    OR DRWT_NO4 = #{parameter}
+		    OR DRWT_NO5 = #{parameter}
+		    OR DRWT_NO6 = #{parameter}
+		    OR DRWT_NO2 = #{parameter}
+		    OR BNUS_NO = #{parameter}
+	</select>
+	
+	<select id="getAllNumber" parameterType="com.lotto.vo.LottoVO" 
+			resultType="com.lotto.vo.LottoVO">
+		SELECT DRW_NO 
+		     , DRWT_NO1 
+		     , DRWT_NO2
+		     , DRWT_NO3
+		     , DRWT_NO4
+		     , DRWT_NO5
+		     , DRWT_NO6
+		     , BNUS_NO
+		  FROM LOTTO_RECORD
+		<if test='drwLowNo != 0 and drwHighNo != 0'>
+		 WHERE DRW_NO >= #{drwLowNo}
+		   AND DRW_NO <![CDATA[<=]]> #{drwHighNo}	  
+		</if>
+		 ORDER BY DRW_NO
+	</select>
+	
+	<select id="getMaxRound" resultType="int">
+		SELECT MAX(DRW_NO) 
+		  FROM LOTTO_RECORD
+	</select>
+	
+	<select id="getDrwtNoByRound" parameterType="int"
+			resultType="com.lotto.vo.LottoVO">
+		SELECT DRWT_NO1 
+		     , DRWT_NO2
+		     , DRWT_NO3
+		     , DRWT_NO4
+		     , DRWT_NO5
+		     , DRWT_NO6
+		     , BNUS_NO
+		     , DRW_NO 
+		  FROM LOTTO_RECORD
+		 WHERE DRW_NO = #{parameter}
+	</select>
+	
+	<select id="getMaxTotSellamnt" resultType="com.lotto.vo.LottoVO">
+		SELECT DRW_NO 
+		     , TOT_SELLAMNT 
+		  FROM LOTTO_RECORD
+		 WHERE TOT_SELLAMNT = (SELECT MAX(TOT_SELLAMNT)
+		                         FROM LOTTO_RECORD)
+		   AND ROWNUM = 1
+	</select>
+
+	<select id="getMaxFirstWinamnt" resultType="com.lotto.vo.LottoVO">
+		SELECT DRW_NO 
+		     , FIRST_WINAMNT 
+		  FROM LOTTO_RECORD
+		 WHERE FIRST_WINAMNT = (SELECT MAX(FIRST_WINAMNT)
+		                          FROM LOTTO_RECORD)
+		   AND ROWNUM = 1
+	</select>
+
+	<select id="getMaxFirstAccumamnt" resultType="com.lotto.vo.LottoVO">
+		SELECT DRW_NO 
+		     , FIRST_ACCUMAMNT 
+		  FROM LOTTO_RECORD
+		 WHERE FIRST_ACCUMAMNT = (SELECT MAX(FIRST_ACCUMAMNT)
+		                            FROM LOTTO_RECORD)
+		   AND ROWNUM = 1
+	</select>
+	
+	<select id="getMaxFirstPrzwnerCo" resultType="com.lotto.vo.LottoVO">
+		SELECT DRW_NO 
+     	     , FIRST_PRZWNER_CO
+		  FROM LOTTO_RECORD
+		 WHERE FIRST_PRZWNER_CO = (SELECT MAX(FIRST_PRZWNER_CO)
+		                             FROM LOTTO_RECORD)
+		   AND ROWNUM = 1
+	</select>
+	
+	<select id="getPrizeInfo" resultType="com.lotto.vo.LottoVO"
+			parameterType="com.lotto.vo.LottoSortVO">
+		SELECT DRW_NO
+		     , TOT_SELLAMNT
+		     , FIRST_WINAMNT 
+		     , FIRST_ACCUMAMNT
+		     , FIRST_PRZWNER_CO
+		  FROM LOTTO_RECORD
+			<if test='totSellamnt == "ASC"'>
+		 ORDER BY TOT_SELLAMNT ASC
+			 </if> 
+			<if test='totSellamnt == "DESC"'>
+		 ORDER BY TOT_SELLAMNT DESC
+			 </if> 
+			<if test='firstWinamnt == "ASC"'>
+		 ORDER BY FIRST_WINAMNT ASC
+			 </if> 
+			<if test='firstWinamnt == "DESC"'>
+		 ORDER BY FIRST_WINAMNT DESC
+			 </if> 
+			<if test='firstAccumamnt == "ASC"'>
+		 ORDER BY FIRST_ACCUMAMNT ASC
+			 </if> 
+			<if test='firstAccumamnt == "DESC"'>
+		 ORDER BY FIRST_ACCUMAMNT DESC
+			 </if> 
+			<if test='drwNo == "ASC"'>
+		 ORDER BY DRW_NO ASC
+			 </if> 
+			<if test='drwNo == "DESC"'>
+		 ORDER BY DRW_NO DESC
+			 </if>
+			<if test='firstPrzwnerCo == "ASC"'>
+		 ORDER BY FIRST_PRZWNER_CO ASC
+			 </if> 
+			<if test='firstPrzwnerCo == "DESC"'>
+		 ORDER BY FIRST_PRZWNER_CO DESC
+			 </if>
+	</select>
+	
+	<select id="getLottoScoreList" resultType="com.lotto.vo.LottoScoreVO"
+			parameterType="java.util.Map">
+		SELECT DRW_NO 
+		     , COALESCE(SCORE1, 0) + COALESCE(SCORE2, 0) + COALESCE(SCORE3, 0) + COALESCE(SCORE4, 0) + COALESCE(SCORE5, 0) + COALESCE(SCORE6, 0) AS SCORE
+		  FROM (SELECT DRW_NO 
+				     , CASE 
+				     	 WHEN DRWT_NO1 = #{num1} THEN 1
+				     	 WHEN DRWT_NO2 = #{num1} THEN 1
+				     	 WHEN DRWT_NO3 = #{num1} THEN 1
+				     	 WHEN DRWT_NO4 = #{num1} THEN 1
+				     	 WHEN DRWT_NO5 = #{num1} THEN 1
+				     	 WHEN DRWT_NO6 = #{num1} THEN 1
+				     	 WHEN BNUS_NO = #{num1} THEN 0.5
+				       END SCORE1
+				     , CASE 
+				     	 WHEN DRWT_NO1 = #{num2} THEN 1
+				     	 WHEN DRWT_NO2 = #{num2} THEN 1
+				     	 WHEN DRWT_NO3 = #{num2} THEN 1
+				     	 WHEN DRWT_NO4 = #{num2} THEN 1
+				     	 WHEN DRWT_NO5 = #{num2} THEN 1
+				     	 WHEN DRWT_NO6 = #{num2} THEN 1
+				     	 WHEN BNUS_NO = #{num2} THEN 0.5
+				       END SCORE2
+				     , CASE 
+				     	 WHEN DRWT_NO1 = #{num3} THEN 1
+				     	 WHEN DRWT_NO2 = #{num3} THEN 1
+				     	 WHEN DRWT_NO3 = #{num3} THEN 1
+				     	 WHEN DRWT_NO4 = #{num3} THEN 1
+				     	 WHEN DRWT_NO5 = #{num3} THEN 1
+				     	 WHEN DRWT_NO6 = #{num3} THEN 1
+				     	 WHEN BNUS_NO = #{num3} THEN 0.5
+				       END SCORE3
+				     , CASE 
+				     	 WHEN DRWT_NO1 = #{num4} THEN 1
+				     	 WHEN DRWT_NO2 = #{num4} THEN 1
+				     	 WHEN DRWT_NO3 = #{num4} THEN 1
+				     	 WHEN DRWT_NO4 = #{num4} THEN 1
+				     	 WHEN DRWT_NO5 = #{num4} THEN 1
+				     	 WHEN DRWT_NO6 = #{num4} THEN 1
+				     	 WHEN BNUS_NO = #{num4} THEN 0.5
+				       END SCORE4
+				     , CASE 
+				     	 WHEN DRWT_NO1 = #{num5} THEN 1
+				     	 WHEN DRWT_NO2 = #{num5} THEN 1
+				     	 WHEN DRWT_NO3 = #{num5} THEN 1
+				     	 WHEN DRWT_NO4 = #{num5} THEN 1
+				     	 WHEN DRWT_NO5 = #{num5} THEN 1
+				     	 WHEN DRWT_NO6 = #{num5} THEN 1
+				     	 WHEN BNUS_NO = #{num5} THEN 0.5
+				       END SCORE5
+				     , CASE 
+				     	 WHEN DRWT_NO1 = #{num6} THEN 1
+				     	 WHEN DRWT_NO2 = #{num6} THEN 1
+				     	 WHEN DRWT_NO3 = #{num6} THEN 1
+				     	 WHEN DRWT_NO4 = #{num6} THEN 1
+				     	 WHEN DRWT_NO5 = #{num6} THEN 1
+				     	 WHEN DRWT_NO6 = #{num6} THEN 1
+				     	 WHEN BNUS_NO = #{num6} THEN 0.5
+				       END SCORE6
+				  FROM LOTTO_RECORD
+				  ORDER BY DRW_NO)
+	</select>
+	
+	<select id="getLottoInfoByDrwNo" resultType="com.lotto.vo.LottoVO">
+		SELECT LOTTO_ID
+		     , TOT_SELLAMNT
+		     , RETURN_VALUE
+		     , TO_CHAR(DRW_NO_DATE, 'YYYY-MM-DD') DRW_NO_DATE
+		     , FIRST_WINAMNT
+		     , DRWT_NO6
+		     , DRWT_NO4
+		     , FIRST_PRZWNER_CO
+		     , DRWT_NO5
+		     , BNUS_NO
+		     , FIRST_ACCUMAMNT
+		     , DRW_NO
+		     , DRWT_NO2
+		     , DRWT_NO3
+		     , DRWT_NO1
+		  FROM LOTTO_RECORD
+		 WHERE DRW_NO = #{num}
+	</select>
+	
+	<select id="getDrwNoByDrwtNo" resultType="com.lotto.vo.LottoVO"
+			parameterType="_int">
+		SELECT DRW_NO 
+		  FROM LOTTO_RECORD
+		 WHERE DRWT_NO1 = #{parameter}
+		    OR DRWT_NO2 = #{parameter}
+		    OR DRWT_NO3 = #{parameter}
+		    OR DRWT_NO4 = #{parameter}
+		    OR DRWT_NO5 = #{parameter}
+		    OR DRWT_NO6 = #{parameter}
+		    OR BNUS_NO = #{parameter}
+		 ORDER BY DRW_NO DESC
+	</select>
+	
+	<select id="getEvenAndOddCount" resultType="com.lotto.vo.LottoVO"
+			parameterType="com.lotto.vo.LottoVO">
+		SELECT (SELECT COUNT(DRWT_NO1_EVEN) DRWT_NO1_EVEN
+				  FROM (SELECT MOD(DRWT_NO1, 2) DRWT_NO1_EVEN
+					 	  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO1_EVEN = 0) DRWT_NO1
+		     , (SELECT COUNT(DRWT_NO2_EVEN) DRWT_NO2_EVEN
+				  FROM (SELECT MOD(DRWT_NO2, 2) DRWT_NO2_EVEN
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO2_EVEN = 0) DRWT_NO2
+			 , (SELECT COUNT(DRWT_NO3_EVEN) DRWT_NO3_EVEN
+				  FROM (SELECT MOD(DRWT_NO3, 2) DRWT_NO3_EVEN
+					 	  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO3_EVEN = 0) DRWT_NO3
+		     , (SELECT COUNT(DRWT_NO4_EVEN) DRWT_NO4_EVEN
+				  FROM (SELECT MOD(DRWT_NO4, 2) DRWT_NO4_EVEN
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo}) 
+				 WHERE DRWT_NO4_EVEN = 0) DRWT_NO4
+			 , (SELECT COUNT(DRWT_NO5_EVEN) DRWT_NO5_EVEN
+				  FROM (SELECT MOD(DRWT_NO5, 2) DRWT_NO5_EVEN
+					 	  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo}) 
+				 WHERE DRWT_NO5_EVEN = 0) DRWT_NO5
+		     , (SELECT COUNT(DRWT_NO6_EVEN) DRWT_NO6_EVEN
+				  FROM (SELECT MOD(DRWT_NO6, 2) DRWT_NO6_EVEN
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo}) 
+				 WHERE DRWT_NO6_EVEN = 0) DRWT_NO6
+		  FROM DUAL 
+		 UNION ALL
+		SELECT (SELECT COUNT(DRWT_NO1_ODD) DRWT_NO1_ODD
+				  FROM (SELECT MOD(DRWT_NO1, 2) DRWT_NO1_ODD
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO1_ODD = 1) DRWT_NO1
+			 , (SELECT COUNT(DRWT_NO2_ODD) DRWT_NO2_ODD
+				  FROM (SELECT MOD(DRWT_NO2, 2) DRWT_NO2_ODD
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO2_ODD = 1) DRWT_NO2
+			 , (SELECT COUNT(DRWT_NO3_ODD) DRWT_NO3_ODD
+				  FROM (SELECT MOD(DRWT_NO3, 2) DRWT_NO3_ODD
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO3_ODD = 1) DRWT_NO3
+			 , (SELECT COUNT(DRWT_NO4_ODD) DRWT_NO4_ODD
+				  FROM (SELECT MOD(DRWT_NO4, 2) DRWT_NO4_ODD
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO4_ODD = 1) DRWT_NO4
+			 , (SELECT COUNT(DRWT_NO5_ODD) DRWT_NO5_ODD
+				  FROM (SELECT MOD(DRWT_NO5, 2) DRWT_NO5_ODD
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO5_ODD = 1) DRWT_NO5
+			 , (SELECT COUNT(DRWT_NO6_ODD) DRWT_NO6_ODD
+				  FROM (SELECT MOD(DRWT_NO6, 2) DRWT_NO6_ODD
+						  FROM LOTTO_RECORD
+		                 WHERE DRW_NO >= #{drwLowNo}
+		                   AND DRW_NO <![CDATA[<=]]> #{drwHighNo})
+				 WHERE DRWT_NO6_ODD = 1) DRWT_NO6
+		  FROM DUAL
+	</select>
+	
+	<select id="getSequencedDrwNo" resultType="com.lotto.vo.LottoSequencedVO"
+			parameterType="_int">
+		WITH Sequenced AS (
+		    SELECT DRW_NO
+		         , DRW_NO - ROW_NUMBER() OVER (ORDER BY DRW_NO) AS GroupID
+		      FROM (SELECT DRW_NO 
+		              FROM LOTTO_RECORD
+		             WHERE DRWT_NO1 = #{parameter}
+		                OR DRWT_NO2 = #{parameter}
+		                OR DRWT_NO3 = #{parameter}
+		                OR DRWT_NO4 = #{parameter}
+		                OR DRWT_NO5 = #{parameter}
+		                OR DRWT_NO6 = #{parameter}
+		                OR BNUS_NO = #{parameter}
+		             ORDER BY DRW_NO)
+		)
+		SELECT *
+		  FROM (SELECT MIN(DRW_NO) DRW_LOW_NO
+				     , MAX(DRW_NO) DRW_HIGH_NO
+				  FROM Sequenced
+				 GROUP BY GroupID
+				 ORDER BY DRW_LOW_NO)
+		 WHERE DRW_HIGH_NO - DRW_LOW_NO > 0
+	</select>
+	
+	<select id="getNotEmerged" resultType="com.lotto.vo.LottoVO" 
+			parameterType="com.lotto.vo.LottoVO">
+		SELECT DRW_NO
+		  FROM LOTTO_RECORD
+		 WHERE DRW_NO NOT IN (SELECT DRW_NO
+							    FROM LOTTO_RECORD
+							   WHERE DRWT_NO1 = #{drwtNo1}
+							      OR DRWT_NO2 = #{drwtNo1}
+							      OR DRWT_NO3 = #{drwtNo1}
+							      OR DRWT_NO4 = #{drwtNo1}
+							      OR DRWT_NO5 = #{drwtNo1}
+							      OR DRWT_NO6 = #{drwtNo1}
+							      OR BNUS_NO = #{drwtNo1})
+		   AND DRW_NO >= #{drwLowNo}
+		   AND DRW_NO <![CDATA[<=]]> #{drwHighNo}
+		 ORDER BY DRW_NO 
+	</select>
+</mapper>
